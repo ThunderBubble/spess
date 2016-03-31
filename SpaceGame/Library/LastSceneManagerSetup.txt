@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/Scene1.unity
+- path: C:/Users/Jake/Desktop/gitHub/2DSandbox/Assets/_Scenes/Mainscene.unity
   isLoaded: 1
   isActive: 1
