@@ -33,7 +33,6 @@ public class TESTEVERYTHINGHERE : MonoBehaviour {
         {
             mousedOver();
         }
-        //Debug.Log("HI");
     }
 
     static void mousedOver()

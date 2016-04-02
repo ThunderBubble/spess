@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class ShipController : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class ShipController : MonoBehaviour {
 
 	public float speed;
 	public float rotationalSpeed;
+    public Text testText;
 
 	// Use this for initialization
 	void Start () {
@@ -23,4 +25,9 @@ public class ShipController : MonoBehaviour {
 		rb.AddRelativeForce (movement * speed);
 		rb.AddTorque (-rotate * rotationalSpeed);
 	}
+
+    public void setText(string text)
+    {
+        testText.text = text;
+    }
 }
