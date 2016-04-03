@@ -1,21 +1,36 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlaceWire : MonoBehaviour
 {
 	public GameObject powerWirePrefab;
-	public GameObject ship;
 
-	private bool placingPowerWire = false;
-	private bool placingExhaustWire = false;
+	private bool placingPowerWire;
+	private bool placingExhaustWire;
 
 	private GameObject previousWire;
 
+	public List<GameObject> wires;
+
+	void Start()
+	{
+		ClearInputHist();
+	}
+
 	void Update()
 	{
-		if (!gameObject.GetComponent<BoxCollider2D>().IsTouchingLayers(LayerMask.GetMask("Wiring"))) {
-			if (Input.GetKeyDown(KeyCode.E)) {
-				AddNewWire(powerWirePrefab, transform.position, ship.transform);
+		// Check for input, check if the position is empty, and check if we placed a wire already
+		if (Input.GetKeyDown(KeyCode.E)) {
+			if (CheckPositionEmpty(transform.position)) {
+				if (placingPowerWire) {
+					previousWire = AddConnectingWire(previousWire, transform.position);
+					wires.Add(previousWire);
+				} else {
+					previousWire = AddNewWire(powerWirePrefab, transform.position, transform.parent);
+					wires.Add(previousWire);
+					placingPowerWire = true;
+				}
 			}
 		}
 	}
@@ -51,5 +66,24 @@ public class PlaceWire : MonoBehaviour
 		wire.GetComponent<PowerWire>().previousWire = connectingWire;
 		wire.GetComponent<PowerWire>().isWireOrigin = false;
 		return wire;
+	}
+
+	void ClearInputHist()
+	{
+		placingPowerWire = false;
+		placingExhaustWire = false;
+		previousWire = null;
+	}
+
+	// Returns whether the given position has a wire in it
+	bool CheckPositionEmpty(Vector3 position)
+	{
+		int i = 0;
+		while (i < wires.Count) {
+			if (wires[i].transform.localPosition == position) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -18,13 +18,25 @@ public class PowerWire : MonoBehaviour {
 	 * @return true/false
 	 */
 	public bool WireGetConnectsToPower () {
-		GameObject nw = nextWire;
-		while (nw != null) {
-			if (nw.tag == "Power") {
+		// Check next blocks
+		GameObject wire = nextWire;
+		while (wire != null) {
+			if (wire.tag == "Power") {
 				return true;
 			}
-			nw = nw.GetComponent<PowerWire>().nextWire;
+			wire = wire.GetComponent<PowerWire>().nextWire;
 		}
+
+		// Check previous blocks
+		wire = previousWire;
+		while (wire != null) {
+			if (wire.tag == "Power") {
+				return true;
+			}
+			wire = wire.GetComponent<PowerWire>().previousWire;
+		}
+
+		// Return false if we haven't found one
 		return false;
 	}
 
