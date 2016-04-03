@@ -26,14 +26,13 @@ public class PlayerMovement : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		Vector2 moveDir = new Vector2(0, 0);
 
-		Vector2 linearVelocity = shipBody.velocity - myBody.velocity;
+		Vector2 linearVelocity = shipBody.velocity - myBody.velocity; // Difference in linear velocity
 		Vector3 angularDirection = Vector3.Cross(shipBody.position - myBody.position, Vector3.forward).normalized; // Direction to compute angular velocity difference in
 		// Magnitude of difference in angular velocity
-		Vector2 angularVelocity = new Vector2(angularDirection.x,angularDirection.y) * shipBody.angularVelocity * (shipBody.position - myBody.position).magnitude * Mathf.PI / 180;
+		Vector2 angularVelocity = new Vector2(angularDirection.x, angularDirection.y) * shipBody.angularVelocity * (shipBody.position - myBody.position).magnitude * Mathf.PI / 180;
 		// Force = velocity(linear component + angular component) * mass / time
-		relativeForce = (linearVelocity + angularVelocity) * myBody.mass / Time.deltaTime;
+		relativeForce = (linearVelocity + angularVelocity) * myBody.mass / Time.fixedDeltaTime;
 
 		// Friction relative to ship
 		if (relativeForce.magnitude > frictionStatic * myBody.mass) { // Check if we have sufficient force to overcome static friction
@@ -41,6 +40,8 @@ public class PlayerMovement : MonoBehaviour
 		} else {
 			myBody.AddForce(relativeForce); // Static friction - this should keep the player in place with respect to the ship
 		}
+
+		Vector2 moveDir = new Vector2(0, 0); // Vector to hold the direction of our movement
 
 		// Movement with WASD
 		if (Input.GetKey(KeyCode.W)) {
@@ -55,8 +56,6 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetKey(KeyCode.D)) {
 			moveDir += new Vector2(1, 0);
 		}
-		if (moveDir.magnitude != 0)
-			myBody.AddForce(moveDir.normalized * myBody.mass * speed);
-		myBody.AddForce(relativeForce / maxSpeed); // Cap the player's speed
+		myBody.AddForce(moveDir.normalized * myBody.mass * speed * (1 - (relativeForce.magnitude / maxSpeed)));
 	}
 }
