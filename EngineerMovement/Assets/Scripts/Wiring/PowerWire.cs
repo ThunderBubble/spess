@@ -11,6 +11,8 @@ public class PowerWire : MonoBehaviour {
 	void start() {
 		previousWire = null;
 		nextWire = null;
+
+		name = "PowerWire";
 	}
 
 	/**
