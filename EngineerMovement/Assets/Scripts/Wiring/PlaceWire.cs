@@ -9,6 +9,7 @@ public class PlaceWire : MonoBehaviour
 
 	// Public variables
 	public GameObject powerWirePrefab;
+	public GameObject exhaustWirePrefab;
 	public List<GameObject> wires;
 
 	// Private variables
@@ -17,6 +18,11 @@ public class PlaceWire : MonoBehaviour
 
 	private GameObject previousWire;
 
+	// Controls
+	private const KeyCode placePower = KeyCode.E;
+	private const KeyCode placeExhaust = KeyCode.Q;
+	private const KeyCode cancel = KeyCode.F;
+
 	void Start()
 	{
 		ClearInputHist();
@@ -24,31 +30,79 @@ public class PlaceWire : MonoBehaviour
 
 	void Update()
 	{
+		/***** Code for adding power wires *****/
+
 		// Check for input, check if the position is empty, and check if we placed a wire already
-		if (Input.GetKeyDown(KeyCode.E)) {
-			if (CheckPosition(transform.localPosition) == null) {
+		if (Input.GetKeyDown(placePower)) {
+			GameObject thisSquare = CheckPosition(transform.localPosition);
+
+			// Nothing in this square; check to see if we can add a new block
+			if (thisSquare == null) {
 				if (placingPowerWire) {
 					if (CheckDirections(transform.localPosition, previousWire)) {
-						previousWire = AddConnectingWire(previousWire, transform.position);
+						previousWire = AddConnectingPowerWire(previousWire, transform.position);
 						wires.Add(previousWire);
 					}
-				} else {
-					previousWire = AddNewWire(powerWirePrefab, transform.position, transform.parent);
+				} else if (placingExhaustWire == false) {
+					previousWire = AddNewPowerWire(powerWirePrefab, transform.position, transform.parent);
 					wires.Add(previousWire);
 					placingPowerWire = true;
 				}
+			} 
+
+			// Power in this square; check if we can connect a wire to power
+			else if (thisSquare.tag == "Power") {
+				if (placingPowerWire && CheckDirections(transform.localPosition, previousWire)) {
+					previousWire.GetComponent<PowerWire>().nextWire = thisSquare;
+					placingPowerWire = false;
+				}
 			}
+		}
+
+		/***** Code for adding exhaust wires *****/
+
+		// Check for input, check if the position is empty, and check if we placed a wire already
+		if (Input.GetKeyDown(placeExhaust)) {
+			GameObject thisSquare = CheckPosition(transform.localPosition);
+
+			// Nothing in this square; check to see if we can add a new block
+			if (thisSquare == null) {
+				if (placingExhaustWire) {
+					if (CheckDirections(transform.localPosition, previousWire)) {
+						previousWire = AddConnectingExhaustWire(previousWire, transform.position);
+						wires.Add(previousWire);
+					}
+				} else if (placingPowerWire == false) {
+					previousWire = AddNewExhaustWire(exhaustWirePrefab, transform.position, transform.parent);
+					wires.Add(previousWire);
+					placingExhaustWire = true;
+				}
+			} 
+
+			// Exhaust in this square; check if we can connect a wire to power
+			else if (thisSquare.tag == "Exhaust") {
+				if (placingExhaustWire && CheckDirections(transform.localPosition, previousWire)) {
+					previousWire.GetComponent<ExhaustWire>().nextWire = thisSquare;
+					placingExhaustWire = false;
+				}
+			}
+		}
+
+		/***** Code for cancelling the current wire *****/
+
+		if (Input.GetKeyDown(cancel)) {
+			ClearInputHist();
 		}
 	}
 
 	/**
-	 * Creates the start of a wire.
+	 * Creates the start of a power wire.
 	 * @param Prefab wire
 	 * @param Position to create the new wire at
 	 * @param Parent (probably the ship)
 	 * @return The new wire
 	 */
-	public GameObject AddNewWire(GameObject prefab, Vector3 position, Transform parent)
+	public GameObject AddNewPowerWire(GameObject prefab, Vector3 position, Transform parent)
 	{
 		GameObject wire = Instantiate(prefab, position, parent.rotation) as GameObject;
 		wire.transform.SetParent(parent);
@@ -59,12 +113,29 @@ public class PlaceWire : MonoBehaviour
 	}
 
 	/**
-	 * Creates a wire connecting to connectedWire at position offset
+	 * Creates the start of an exhaust wire.
+	 * @param Prefab wire
+	 * @param Position to create the new wire at
+	 * @param Parent (probably the ship)
+	 * @return The new wire
+	 */
+	public GameObject AddNewExhaustWire(GameObject prefab, Vector3 position, Transform parent)
+	{
+		GameObject wire = Instantiate(prefab, position, parent.rotation) as GameObject;
+		wire.transform.SetParent(parent);
+
+		wire.GetComponent<ExhaustWire>().isWireOrigin = true;
+
+		return wire;
+	}
+
+	/**
+	 * Creates a power wire connecting to connectedWire at position offset
 	 * @param The original wire
 	 * @param Position to create the new wire at
 	 * @return The new wire
 	 */
-	public GameObject AddConnectingWire(GameObject previousWire, Vector3 position)
+	public GameObject AddConnectingPowerWire(GameObject previousWire, Vector3 position)
 	{
 		// Create a new wire
 		GameObject wire = Instantiate(previousWire, position, previousWire.transform.parent.rotation) as GameObject;
@@ -73,6 +144,25 @@ public class PlaceWire : MonoBehaviour
 		previousWire.GetComponent<PowerWire>().nextWire = wire;
 		wire.GetComponent<PowerWire>().previousWire = previousWire;
 		wire.GetComponent<PowerWire>().isWireOrigin = false;
+
+		return wire;
+	}
+
+	/**
+	 * Creates an exhaust wire connecting to connectedWire at position offset
+	 * @param The original wire
+	 * @param Position to create the new wire at
+	 * @return The new wire
+	 */
+	public GameObject AddConnectingExhaustWire(GameObject previousWire, Vector3 position)
+	{
+		// Create a new wire
+		GameObject wire = Instantiate(previousWire, position, previousWire.transform.parent.rotation) as GameObject;
+		wire.transform.SetParent(previousWire.transform.parent);
+
+		previousWire.GetComponent<ExhaustWire>().nextWire = wire;
+		wire.GetComponent<ExhaustWire>().previousWire = previousWire;
+		wire.GetComponent<ExhaustWire>().isWireOrigin = false;
 
 		return wire;
 	}
@@ -103,37 +193,23 @@ public class PlaceWire : MonoBehaviour
 	// Returns whether a matching wire is in any cardinal direction
 	bool CheckDirections(Vector3 position, GameObject wire)
 	{
+		GameObject resultWire;
+
 		// North
-		GameObject result = CheckPosition(position + new Vector3(0, GRIDSIZE));
-		if (result != null) {
-			if (result.tag == wire.tag) {
-				return true;
-			}
-		}
+		resultWire = CheckPosition(position + new Vector3(0, GRIDSIZE));
+		if (resultWire == wire) return true;
 
 		// East
-		result = CheckPosition(position + new Vector3(GRIDSIZE, 0));
-		if (result != null) {
-			if (result.tag == wire.tag) {
-				return true;
-			}
-		}
+		resultWire = CheckPosition(position + new Vector3(GRIDSIZE, 0));
+		if (resultWire == wire) return true;
 
 		// South
-		result = CheckPosition(position + new Vector3(0, -1F * GRIDSIZE));
-		if (result != null) {
-			if (result.tag == wire.tag) {
-				return true;
-			}
-		}
+		resultWire = CheckPosition(position + new Vector3(0, -1F * GRIDSIZE));
+		if (resultWire == wire) return true;
 
 		// West
-		result = CheckPosition(position + new Vector3(-1F * GRIDSIZE, 0));
-		if (result != null) {
-			if (result.tag == wire.tag) {
-				return true;
-			}
-		}
+		resultWire = CheckPosition(position + new Vector3(-1F * GRIDSIZE, 0));
+		if (resultWire == wire) return true;
 		return false;
 	}
 }

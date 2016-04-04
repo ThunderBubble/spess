@@ -53,4 +53,18 @@ public class PowerWire : MonoBehaviour {
 		}
 		return pw;
 	}
+
+	/**
+	 * Destroys this instance and sets the connected wire(s) to have null connections.
+	 */
+	public void DestroySelf () {
+		if (previousWire != null) {
+			previousWire.GetComponent<PowerWire>().nextWire = null;
+		}
+		if (nextWire != null) {
+			nextWire.GetComponent<PowerWire>().previousWire = null;
+		}
+
+		Destroy(gameObject);
+	}
 }
