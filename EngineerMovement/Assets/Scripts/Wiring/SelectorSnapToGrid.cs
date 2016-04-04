@@ -3,6 +3,10 @@ using System.Collections;
 
 public class SelectorSnapToGrid : MonoBehaviour
 {
+	// Constants
+	private const float GRIDSIZE = 1.0F;
+
+	// Public variables
 	public GameObject player;
 	public GameObject ship;
 
@@ -24,6 +28,6 @@ public class SelectorSnapToGrid : MonoBehaviour
 		//transform.rotation = ship.transform.rotation;
 
 		// Significantly simpler script using parents
-		transform.localPosition = new Vector3(Mathf.Round(player.transform.localPosition.x), Mathf.Round(player.transform.localPosition.y));
+		transform.localPosition = new Vector3(Mathf.Round(player.transform.localPosition.x)*GRIDSIZE, Mathf.Round(player.transform.localPosition.y)*GRIDSIZE);
 	}
 }

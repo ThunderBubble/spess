@@ -10,7 +10,7 @@ public class PlaceWire : MonoBehaviour
 	// Public variables
 	public GameObject powerWirePrefab;
 	public GameObject exhaustWirePrefab;
-	public List<GameObject> wires;
+	public List<GameObject> wires = new List<GameObject>();
 
 	// Private variables
 	private bool placingPowerWire;
@@ -182,7 +182,7 @@ public class PlaceWire : MonoBehaviour
 	{
 		int i = 0;
 		while (i < wires.Count) {
-			if (wires[i].transform.localPosition == position) {
+			if ((wires[i].transform.localPosition - position).magnitude < 0.05) {
 				return wires[i];
 			}
 			i++;
