@@ -108,6 +108,7 @@ public class PlaceWire : MonoBehaviour
 		wire.transform.SetParent(parent);
 
 		wire.GetComponent<PowerWire>().isWireOrigin = true;
+		wire.GetComponent<PowerWire>().wireController = gameObject;
 
 		return wire;
 	}
@@ -125,6 +126,7 @@ public class PlaceWire : MonoBehaviour
 		wire.transform.SetParent(parent);
 
 		wire.GetComponent<ExhaustWire>().isWireOrigin = true;
+		wire.GetComponent<ExhaustWire>().wireController = gameObject;
 
 		return wire;
 	}
@@ -144,6 +146,7 @@ public class PlaceWire : MonoBehaviour
 		previousWire.GetComponent<PowerWire>().nextWire = wire;
 		wire.GetComponent<PowerWire>().previousWire = previousWire;
 		wire.GetComponent<PowerWire>().isWireOrigin = false;
+		wire.GetComponent<PowerWire>().wireController = gameObject;
 
 		return wire;
 	}
@@ -163,6 +166,7 @@ public class PlaceWire : MonoBehaviour
 		previousWire.GetComponent<ExhaustWire>().nextWire = wire;
 		wire.GetComponent<ExhaustWire>().previousWire = previousWire;
 		wire.GetComponent<ExhaustWire>().isWireOrigin = false;
+		wire.GetComponent<ExhaustWire>().wireController = gameObject;
 
 		return wire;
 	}

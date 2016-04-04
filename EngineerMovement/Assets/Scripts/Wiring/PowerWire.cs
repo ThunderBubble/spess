@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class PowerWire : MonoBehaviour {
+	public GameObject wireController;
 
 	public GameObject previousWire; // Either the wire before the one, or null
 	public GameObject nextWire; // Either the wire after this one, or power
@@ -64,6 +65,8 @@ public class PowerWire : MonoBehaviour {
 		if (nextWire != null) {
 			nextWire.GetComponent<PowerWire>().previousWire = null;
 		}
+
+		wireController.GetComponent<PlaceWire>().wires.Remove(gameObject);
 
 		Destroy(gameObject);
 	}

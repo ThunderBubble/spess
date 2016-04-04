@@ -8,3 +8,6 @@ Unmerged features of this branch:
 + Added power and exhaust module prefabs
 	* These serve no purpose so far except to end wires
 + Made prefabs for ship block room hitboxes
+
+Outstanding issues:
+- None so far
