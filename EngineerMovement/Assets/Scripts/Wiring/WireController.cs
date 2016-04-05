@@ -53,7 +53,7 @@ public class WireController : MonoBehaviour
 					}
 
 					// Start placing a power wire from a power source
-					else if (objectHere.GetComponent<WiringGlobal>().GetType() == "Power") {
+					else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
 						previous = objectHere;
 						state = State.PLACING_POWER_FROM_SOURCE;
 					}
@@ -70,7 +70,7 @@ public class WireController : MonoBehaviour
 					}
 
 					// Connect a wire to a power source
-					else if (objectHere.GetComponent<WiringGlobal>().GetType() == "Power") {
+					else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
 						previous.GetComponent<Wire>().SetNext(objectHere);
 
 						// Test code

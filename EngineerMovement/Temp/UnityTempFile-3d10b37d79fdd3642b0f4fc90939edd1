@@ -81,10 +81,11 @@ Assets/Scripts/Player/PlayerMovement.cs
 Assets/Scripts/Ship/AddRotation.cs
 Assets/Scripts/Ship/ShipFindCenter.cs
 Assets/Scripts/Ship/ShipMovement.cs
-Assets/Scripts/Ship/ShipRoomUpdateDoors.cs
 Assets/Scripts/UI/CameraFollowShip.cs
-Assets/Scripts/Wiring/PlaceWire.cs
-Assets/Scripts/Wiring/PowerWire.cs
 Assets/Scripts/Wiring/SelectorSnapToGrid.cs
+Assets/Scripts/Wiring/Source.cs
+Assets/Scripts/Wiring/Wire.cs
+Assets/Scripts/Wiring/WireController.cs
+Assets/Scripts/Wiring/WiringGlobal.cs
 -r:"C:\Program Files\Unity\Editor\Data\Mono\lib\mono\unity\System.Runtime.Serialization.dll"
 -r:"C:\Program Files\Unity\Editor\Data\Mono\lib\mono\unity\System.Xml.Linq.dll"

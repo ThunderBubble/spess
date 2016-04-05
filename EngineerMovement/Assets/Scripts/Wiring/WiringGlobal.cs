@@ -15,7 +15,7 @@ public class WiringGlobal : MonoBehaviour {
 	 * Function to get the wiring object's type.
 	 * @return String containing the type tag
 	 */
-	public string GetType() {
+	public string GetWireType() {
 		return tag;
 	}
 

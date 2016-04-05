@@ -64,7 +64,7 @@ public class Wire : MonoBehaviour
 		// Check previous blocks
 		wire = previousWire;
 		while (wire != null) {
-			if (wire.GetComponent<WiringGlobal>().GetType() == "Power") {
+			if (wire.GetComponent<WiringGlobal>().GetWireType() == "Power") {
 				return true;
 			}
 			wire = wire.GetComponent<Wire>().GetPrevious();
