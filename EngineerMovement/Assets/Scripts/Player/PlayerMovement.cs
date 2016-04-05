@@ -3,23 +3,30 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+	// Movement settings
 	public float speed;
 	public float maxSpeed;
 	public float frictionKinetic;
 	public float frictionStatic;
 
 	private Rigidbody2D myBody;
-
-	public GameObject floor;
 	private Rigidbody2D shipBody;
-
 	private Vector2 relativeForce;
+
+	// Ship parent
+	public GameObject ship;
+
+	// Controls
+	public KeyCode up = KeyCode.W;
+	public KeyCode right = KeyCode.D;
+	public KeyCode down = KeyCode.S;
+	public KeyCode left = KeyCode.A;
 
 	// Use this for initialization
 	void Start()
 	{
 		myBody = GetComponent<Rigidbody2D>();
-		shipBody = floor.GetComponent<Rigidbody2D>();
+		shipBody = ship.GetComponent<Rigidbody2D>();
 
 		myBody.freezeRotation = true; // Keep our player from rotating because of collisions
 	}
@@ -42,20 +49,20 @@ public class PlayerMovement : MonoBehaviour
 
 		Vector2 moveDir = new Vector2(0, 0); // Vector to hold the direction of our movement
 
-		// Movement with WASD
-		if (Input.GetKey(KeyCode.W)) {
+		// Movement with controls
+		if (Input.GetKey(up)) {
 			moveDir += new Vector2(0, 1);
 		}
-		if (Input.GetKey(KeyCode.A)) {
-			moveDir += new Vector2(-1, 0);
-		}
-		if (Input.GetKey(KeyCode.S)) {
-			moveDir += new Vector2(0, -1);
-		}
-		if (Input.GetKey(KeyCode.D)) {
+		if (Input.GetKey(right)) {
 			moveDir += new Vector2(1, 0);
 		}
+		if (Input.GetKey(down)) {
+			moveDir += new Vector2(0, -1);
+		}
+		if (Input.GetKey(left)) {
+			moveDir += new Vector2(-1, 0);
+		}
 		if(moveDir.magnitude > 0)
-			myBody.AddForce(moveDir.normalized * myBody.mass * speed * (1 - (relativeForce.magnitude / maxSpeed)));
+			myBody.AddForce(moveDir.normalized * myBody.mass * speed * Mathf.Max(0, 1 - (relativeForce.magnitude / maxSpeed)));
 	}
 }

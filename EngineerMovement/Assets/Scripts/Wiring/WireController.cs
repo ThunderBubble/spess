@@ -30,9 +30,9 @@ public class WireController : MonoBehaviour
 	private List<GameObject> wires = new List<GameObject>();
 
 	// Controls
-	private KeyCode placePower = KeyCode.E;
-	private KeyCode placeExhaust = KeyCode.Q;
-	private KeyCode cancel = KeyCode.F;
+	public KeyCode placePower = KeyCode.E;
+	public KeyCode placeExhaust = KeyCode.Q;
+	public KeyCode cancel = KeyCode.F;
 
 	void Start()
 	{
