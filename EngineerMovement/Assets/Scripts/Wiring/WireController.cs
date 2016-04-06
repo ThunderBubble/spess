@@ -16,6 +16,16 @@ public class WireController : MonoBehaviour
 
 	;
 
+	public enum Event
+	{
+		ERROR,
+		STARTED_POWER_FROM_ORIGIN,
+		STARTED_POWER_FROM_SOURCE,
+		CONTINUED_POWER,
+		FINISHED_POWER}
+
+	;
+
 	// Constants
 	private const float GRIDSIZE = 1.0F;
 
@@ -26,6 +36,7 @@ public class WireController : MonoBehaviour
 	private State state = State.PENDING;
 
 	private GameObject previous;
+	private GameObject objectHere;
 
 	private List<GameObject> wires = new List<GameObject>();
 
@@ -36,71 +47,38 @@ public class WireController : MonoBehaviour
 
 	void Start()
 	{
-		ClearState();
+		PowerWireCancel();
 	}
 
 	void Update()
 	{
-		GameObject objectHere = CheckPosition(transform.position);
+		objectHere = CheckPosition(transform.position);
 
 		switch (state) {
 			case State.PENDING:
 				if (Input.GetKeyDown(placePower)) {
-					// Start placing a new power wire
-					if (objectHere == null) {
-						previous = AddNewWire("PowerWire", transform.position, transform.parent);
-						state = State.PLACING_POWER_FROM_ORIGIN;
-					}
-
-					// Start placing a power wire from a power source
-					else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
-						previous = objectHere;
-						state = State.PLACING_POWER_FROM_SOURCE;
-					}
+					WireControllerStartPowerWire(transform.position);
 				}
 				break;
 
 			case State.PLACING_POWER_FROM_ORIGIN:
 				if (Input.GetKeyDown(placePower)) {
-					// Continue an existing wire
-					if (objectHere == null) {
-						if (CheckDirections(transform.position, previous)) {
-							previous = AddConnectingWire("PowerWire", previous, null, transform.position, transform.parent);
-						}
-					}
-
-					// Connect a wire to a power source
-					else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
-						previous.GetComponent<Wire>().SetNext(objectHere);
-
-						// Test code
-						//if (previous.GetComponent<Wire>().WireGetHead().GetComponent<Wire>().WireGetConnectsToPower()) {
-						//	Debug.Log("Connected to power!");
-						//} else {
-						//	Debug.Log("Not connected to power!");
-						//}
-
-						ClearState();
-					}
+					WireControllerContinuePowerWire(transform.position);
 				}
 
 				// Reset to NONE
 				if (Input.GetKeyDown(cancel)) {
-					ClearState();
+					PowerWireCancel();
 				}
 				break;
 
 			case State.PLACING_POWER_FROM_SOURCE:
 				if (Input.GetKeyDown(placePower)) {
-					// Continue an existing wire
-					if (objectHere == null && CheckDirections(transform.position, previous)) {
-						previous = AddConnectingWire("PowerWire", null, previous, transform.position, transform.parent);
-					}
+					WireControllerContinuePowerWire(transform.position);
 				}
-
 				// Reset to NONE
 				if (Input.GetKeyDown(cancel)) {
-					ClearState();
+					PowerWireCancel();
 				}
 				break;
 		}
@@ -116,13 +94,94 @@ public class WireController : MonoBehaviour
 	}
 
 	/**
+	 * Start placing a power wire at position position.
+	 * @param Position to place the new wire
+	 * @return Wire event corresponding to placing from origin, placing from source, or invalid location
+	 */
+	public Event WireControllerStartPowerWire(Vector3 position)
+	{
+		// Start placing a new power wire
+		if (objectHere == null) {
+			previous = AddNewWire("PowerWire", position, transform.parent);
+			state = State.PLACING_POWER_FROM_ORIGIN;
+			return Event.STARTED_POWER_FROM_ORIGIN;
+		}
+
+		// Start placing a power wire from a power source
+		else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
+			previous = objectHere;
+			state = State.PLACING_POWER_FROM_SOURCE;
+			return Event.STARTED_POWER_FROM_SOURCE;
+		} 
+
+		// Couldn't place a wire
+		else {
+			return Event.ERROR;
+		}
+	}
+
+	/**
+	 * Continue a power wire at position position.
+	 * @param Position to place the new wire
+	 * @return Wire event
+	 */
+	public Event WireControllerContinuePowerWire(Vector3 position)
+	{
+		// Currently placing from origin
+		if (state == State.PLACING_POWER_FROM_ORIGIN) {
+			// Make sure we're next to the previous wire
+			if (CheckDirections(position, previous)) {
+				// Make a new wire
+				if (objectHere == null) {
+					previous = AddConnectingWire("PowerWire", previous, null, transform.position, transform.parent);
+					return Event.CONTINUED_POWER;
+				}
+
+				// Connect a wire to a power source
+				else if (objectHere.GetComponent<WiringGlobal>().GetWireType() == "Power") {
+					previous.GetComponent<Wire>().SetNext(objectHere);
+
+					// Test code
+//					if (previous.GetComponent<Wire>().WireGetHead().GetComponent<Wire>().WireGetConnectsToPower()) {
+//						Debug.Log("Connected to power!");
+//					} else {
+//						Debug.Log("Not connected to power!");
+//					}
+
+					PowerWireCancel();
+					return Event.FINISHED_POWER;
+				}
+			}
+		}
+
+		// Currently placing from source
+		if (state == State.PLACING_POWER_FROM_SOURCE) {
+			// Continue an existing wire
+			if (objectHere == null && CheckDirections(transform.position, previous)) {
+				previous = AddConnectingWire("PowerWire", null, previous, transform.position, transform.parent);
+				return Event.CONTINUED_POWER;
+			}
+		}
+		return Event.ERROR;
+	}
+
+	/**
+	 * Clears the input state of the wire controller.
+	 */
+	public void PowerWireCancel()
+	{
+		state = State.PENDING;
+		previous = null;
+	}
+
+	/**
 	 * Creates the start of a power wire.
 	 * @param Type ("PowerWire" or "ExhaustWire")
 	 * @param Position to create the new wire at
 	 * @param Parent (probably the ship)
 	 * @return The new wire
 	 */
-	public GameObject AddNewWire(string type, Vector3 position, Transform parent)
+	private GameObject AddNewWire(string type, Vector3 position, Transform parent)
 	{
 		GameObject wire = Instantiate(wirePrefab, position, parent.rotation) as GameObject;
 		wire.transform.SetParent(parent);
@@ -141,7 +200,7 @@ public class WireController : MonoBehaviour
 	 * @param Position to create the new wire at
 	 * @return The new wire
 	 */
-	public GameObject AddConnectingWire(string type, GameObject previousWire, GameObject nextWire, Vector3 position, Transform parent)
+	private GameObject AddConnectingWire(string type, GameObject previousWire, GameObject nextWire, Vector3 position, Transform parent)
 	{
 		GameObject wire = Instantiate(wirePrefab, position, parent.rotation) as GameObject;
 		wire.transform.SetParent(parent);
@@ -187,13 +246,6 @@ public class WireController : MonoBehaviour
 	}
 
 	/***** Helper methods *****/
-
-	// Clear the state of the wire placer
-	void ClearState()
-	{
-		state = State.PENDING;
-		previous = null;
-	}
 
 	// Returns the wire in the given position in relative space (null if none)
 	GameObject CheckPosition(Vector3 position)
