@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class WireController : MonoBehaviour
 {
 	// Datatypes
-	enum State
+	public enum State
 	{
 		NONE,
 		PENDING,
@@ -33,10 +33,10 @@ public class WireController : MonoBehaviour
 	public GameObject wirePrefab;
 
 	// Private variables
-	private State state = State.PENDING;
+	public State state = State.PENDING;
 
-	private GameObject previous;
-	private GameObject objectHere;
+	public GameObject previous;
+	public GameObject objectHere;
 
 	private List<GameObject> wires = new List<GameObject>();
 
@@ -52,18 +52,18 @@ public class WireController : MonoBehaviour
 
 	void Update()
 	{
-		objectHere = CheckPosition(transform.position);
+		objectHere = CheckPosition(transform.localPosition);
 
 		switch (state) {
 			case State.PENDING:
 				if (Input.GetKeyDown(placePower)) {
-					WireControllerStartPowerWire(transform.position);
+					WireControllerStartPowerWire(transform.localPosition);
 				}
 				break;
 
 			case State.PLACING_POWER_FROM_ORIGIN:
 				if (Input.GetKeyDown(placePower)) {
-					WireControllerContinuePowerWire(transform.position);
+					WireControllerContinuePowerWire(transform.localPosition);
 				}
 
 				// Reset to NONE
@@ -74,7 +74,7 @@ public class WireController : MonoBehaviour
 
 			case State.PLACING_POWER_FROM_SOURCE:
 				if (Input.GetKeyDown(placePower)) {
-					WireControllerContinuePowerWire(transform.position);
+					WireControllerContinuePowerWire(transform.localPosition);
 				}
 				// Reset to NONE
 				if (Input.GetKeyDown(cancel)) {
@@ -157,7 +157,7 @@ public class WireController : MonoBehaviour
 		// Currently placing from source
 		if (state == State.PLACING_POWER_FROM_SOURCE) {
 			// Continue an existing wire
-			if (objectHere == null && CheckDirections(transform.position, previous)) {
+			if (objectHere == null && CheckDirections(transform.localPosition, previous)) {
 				previous = AddConnectingWire("PowerWire", null, previous, transform.position, transform.parent);
 				return Event.CONTINUED_POWER;
 			}
@@ -243,16 +243,17 @@ public class WireController : MonoBehaviour
 
 		wires.Remove(wire);
 		Destroy(wire);
+
 	}
 
 	/***** Helper methods *****/
 
-	// Returns the wire in the given position in relative space (null if none)
+	// Returns the wire in the given position in local space (null if none)
 	GameObject CheckPosition(Vector3 position)
 	{
 		int i = 0;
 		while (i < wires.Count) {
-			if ((wires[i].transform.localPosition - position).magnitude < 0.05) {
+			if ((wires[i].transform.localPosition - position).magnitude < 0.5) {
 				return wires[i];
 			}
 			i++;
@@ -266,12 +267,12 @@ public class WireController : MonoBehaviour
 		GameObject resultWire;
 
 		// North
-		resultWire = CheckPosition(position + new Vector3(0, GRIDSIZE));
+		resultWire = CheckPosition(position + new Vector3(GRIDSIZE, 0));
 		if (resultWire == wire)
 			return true;
 
 		// East
-		resultWire = CheckPosition(position + new Vector3(GRIDSIZE, 0));
+		resultWire = CheckPosition(position + new Vector3(0, GRIDSIZE));
 		if (resultWire == wire)
 			return true;
 
@@ -284,6 +285,7 @@ public class WireController : MonoBehaviour
 		resultWire = CheckPosition(position + new Vector3(-1F * GRIDSIZE, 0));
 		if (resultWire == wire)
 			return true;
+
 		return false;
 	}
 }
