@@ -4,7 +4,7 @@ using System.Collections;
 public class IfDrag : MonoBehaviour {
 
     public GameObject parentBlock;
-    public int direction;
+    public BlockData.direction direct;
 
 	// Use this for initialization
 	void Start () {
@@ -19,7 +19,7 @@ public class IfDrag : MonoBehaviour {
     {
         if (parentBlock.GetComponent<BlockController>().checkClick())
         {
-            parentBlock.GetComponent<BlockController>().ship.GetComponent<ShipController>().addBlock(parentBlock, direction);
+            parentBlock.GetComponent<BlockData>().ship.GetComponent<AddBlock>().addBlock(parentBlock, direct);
             parentBlock.GetComponent<BlockController>().resetClick();
         }
     }
