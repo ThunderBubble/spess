@@ -3,10 +3,10 @@ using System.Collections;
 
 public class Wire : MonoBehaviour
 {
-	private GameObject previousWire; // Either the wire before the one, or null
-	private GameObject nextWire; // Either the wire after this one, null, or power
+	public GameObject previousWire; // Either the wire before the one, or null
+	public GameObject nextWire; // Either the wire after this one, null, or power
 
-	private bool isWireOrigin;
+	public bool isWireOrigin;
 
 	void start()
 	{
@@ -47,15 +47,37 @@ public class Wire : MonoBehaviour
 	}
 
 	/**
-	 * Function to check whether a PowerWire eventually connects to power.
+	 * Function to set the wire's type. Assigns the type and returns true if the type was valid, otherwise returns false.
+	 * @param String containing the desired type tag
+	 * @return Whether the given tag is a valid type
+	 */
+	public bool SetType(string type) {
+		if (type == "PowerWire" || type == "ExhaustWire") {
+			tag = type;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Function to check whether a Wire eventually connects to power. Returns false if given an invalid tag.
 	 * @return true/false
 	 */
-	public bool WireGetConnectsToPower()
+	public bool WireGetConnectsToSource()
 	{
+		GameObject wire;
+		string typeDesired;
+
+		// Set up the tag to check
+		if (tag == "PowerWire")
+			typeDesired = "Power";
+		else
+			typeDesired = "Exhaust";
+			
 		// Check next blocks
-		GameObject wire = nextWire;
+		wire = nextWire;
 		while (wire != null) {
-			if (wire.tag == "Power") {
+			if (wire.GetComponent<WiringGlobal>().GetWireType() == typeDesired) {
 				return true;
 			}
 			wire = wire.GetComponent<Wire>().GetNext();
@@ -64,7 +86,7 @@ public class Wire : MonoBehaviour
 		// Check previous blocks
 		wire = previousWire;
 		while (wire != null) {
-			if (wire.GetComponent<WiringGlobal>().GetWireType() == "Power") {
+			if (wire.GetComponent<WiringGlobal>().GetWireType() == typeDesired) {
 				return true;
 			}
 			wire = wire.GetComponent<Wire>().GetPrevious();

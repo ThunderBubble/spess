@@ -42,7 +42,11 @@ public class PlayerMovement : MonoBehaviour
 
 		// Friction relative to ship
 		if (relativeForce.magnitude > frictionStatic * myBody.mass) { // Check if we have sufficient force to overcome static friction
-			myBody.AddForce(relativeForce.normalized * frictionKinetic); // Kinetic friction
+			// Kinetic friction
+			if ((relativeForce.normalized * frictionKinetic).magnitude < relativeForce.magnitude)
+				myBody.AddForce(relativeForce.normalized * frictionKinetic);
+			else
+				myBody.AddForce(relativeForce);
 		} else {
 			myBody.AddForce(relativeForce); // Static friction - this should keep the player in place with respect to the ship
 		}

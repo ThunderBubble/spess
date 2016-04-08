@@ -2,15 +2,7 @@
 using System.Collections;
 
 public class WiringGlobal : MonoBehaviour {
-
-	public string tagDesired;
-
-	void Start() {
-		if (tagDesired != "") {
-			tag = tagDesired;
-		}
-	}
-
+	
 	/**
 	 * Function to get the wiring object's type.
 	 * @return String containing the type tag
@@ -20,20 +12,22 @@ public class WiringGlobal : MonoBehaviour {
 	}
 
 	/**
-	 * Function to set the wiring object's type.
-	 * @param String containing the desired type tag
-	 * @return Whether the given tag is a valid type
+	 * Returns whether the wiring object is a wire.
+	 * @return True/false
 	 */
-	public bool SetType(string type) {
-		if (type == "Power" || type == "Exhaust") {
-			tag = type;
+	public bool IsWire() {
+		if (tag == "PowerWire" || tag == "ExhaustWire") {
 			return true;
 		}
 		return false;
 	}
 
-	public bool IsWire() {
-		if (tag == "PowerWire" || tag == "ExhaustWire") {
+	/**
+	 * Returns whether the wiring object is a source.
+	 * @return True/false
+	 */
+	public bool IsSource() {
+		if (tag == "Power" || tag == "Exhaust") {
 			return true;
 		}
 		return false;
