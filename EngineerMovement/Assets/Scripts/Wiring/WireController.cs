@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class WireController : MonoBehaviour
 {
 	// Datatypes
-	public enum State
+	enum State
 	{
 		NONE,
 		PENDING,
@@ -33,10 +33,10 @@ public class WireController : MonoBehaviour
 	public GameObject wirePrefab;
 
 	// Private variables
-	public State state = State.PENDING;
+	private State state = State.PENDING;
 
-	public GameObject previous;
-	public GameObject objectHere;
+	private GameObject previous;
+	private GameObject objectHere;
 
 	private List<GameObject> wires = new List<GameObject>();
 
@@ -57,7 +57,7 @@ public class WireController : MonoBehaviour
 		switch (state) {
 			case State.PENDING:
 				if (Input.GetKeyDown(placePower)) {
-					WireControllerStartPowerWire(transform.localPosition);
+					WireControllerStartPowerWire(transform.position);
 				}
 				break;
 
@@ -94,7 +94,7 @@ public class WireController : MonoBehaviour
 	}
 
 	/**
-	 * Start placing a power wire at position position.
+	 * Start placing a power wire at local position position.
 	 * @param Position to place the new wire
 	 * @return Wire event corresponding to placing from origin, placing from source, or invalid location
 	 */
@@ -121,7 +121,7 @@ public class WireController : MonoBehaviour
 	}
 
 	/**
-	 * Continue a power wire at position position.
+	 * Continue a power wire at local position position.
 	 * @param Position to place the new wire
 	 * @return Wire event
 	 */
@@ -177,19 +177,14 @@ public class WireController : MonoBehaviour
 	/**
 	 * Creates the start of a power wire.
 	 * @param Type ("PowerWire" or "ExhaustWire")
-	 * @param Position to create the new wire at
+	 * @param Global osition to create the new wire at
 	 * @param Parent (probably the ship)
 	 * @return The new wire
 	 */
 	private GameObject AddNewWire(string type, Vector3 position, Transform parent)
 	{
-		GameObject wire = Instantiate(wirePrefab, position, parent.rotation) as GameObject;
-		wire.transform.SetParent(parent);
-
-		wire.GetComponent<WiringGlobal>().SetType(type);
+		GameObject wire = InstantiateWire(type, position, parent);
 		wire.GetComponent<Wire>().SetOrigin(true);
-
-		wires.Add(wire);
 		return wire;
 	}
 
@@ -197,13 +192,12 @@ public class WireController : MonoBehaviour
 	 * Creates a power wire connecting to connectedWire at position offset
 	 * @param Previous wire (or null)
 	 * @param Next wire/source (or null)
-	 * @param Position to create the new wire at
+	 * @param Global position to create the new wire at
 	 * @return The new wire
 	 */
 	private GameObject AddConnectingWire(string type, GameObject previousWire, GameObject nextWire, Vector3 position, Transform parent)
 	{
-		GameObject wire = Instantiate(wirePrefab, position, parent.rotation) as GameObject;
-		wire.transform.SetParent(parent);
+		GameObject wire = InstantiateWire(type, position, parent);
 
 		// Previous wire
 		if (previousWire != null) {
@@ -220,11 +214,9 @@ public class WireController : MonoBehaviour
 		}
 		
 		// New wire
-		wire.GetComponent<WiringGlobal>().SetType(type);
 		wire.GetComponent<Wire>().SetPrevious(previousWire);
 		wire.GetComponent<Wire>().SetOrigin(false);
 
-		wires.Add(wire);
 		return wire;
 	}
 
@@ -243,7 +235,6 @@ public class WireController : MonoBehaviour
 
 		wires.Remove(wire);
 		Destroy(wire);
-
 	}
 
 	/***** Helper methods *****/
@@ -288,4 +279,24 @@ public class WireController : MonoBehaviour
 
 		return false;
 	}
+
+	Vector3 LocalToGlobal(Vector3 localPosition, Transform parent) {
+		float angle = parent.rotation.z * Mathf.PI / 180F;
+		float x = localPosition.x * Mathf.Cos(angle) + localPosition.y * Mathf.Sin(angle);
+		float y = localPosition.x * Mathf.Sin(angle) + localPosition.y * Mathf.Cos(angle);
+
+		return new Vector3(parent.position.x + x, parent.position.y + y);
+	}
+
+	// Creates a wire and does some setup
+	GameObject InstantiateWire(string type, Vector3 position, Transform parent) {
+		GameObject wire = Instantiate(wirePrefab, position, parent.rotation) as GameObject;
+
+		wire.transform.SetParent(parent);
+		wire.GetComponent<WiringGlobal>().SetType(type);
+		wires.Add(wire);
+
+		return wire;
+	}
 }
+	
