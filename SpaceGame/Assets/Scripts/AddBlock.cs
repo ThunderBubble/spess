@@ -19,21 +19,24 @@ public class AddBlock : MonoBehaviour {
         GameObject colliderSet = parent.transform.Find("ColliderSet").gameObject;//colliderSet is the parent for the mouse colliders
         GameObject collider;
 
-        collider = colliderSet.transform.Find("ForeCollider").gameObject;//get the child object named collider
-        collider.GetComponent<IfDrag>().parentBlock = parent;//set child object's script to hold a reference to the block it's attatched to
-        collider.GetComponent<IfDrag>().direct = BlockData.direction.fore;//tell the child object's script what direction it's pointed in
+
+		collider = colliderSet.transform.Find("ForeCollider").gameObject;//get the child object named collider
+		collider.GetComponent<IfDrag> ().parentBlock = parent;//set child object's script to hold a reference to the block it's attatched to
+		collider.GetComponent<IfDrag> ().direct = BlockData.direction.fore;//tell the child object's script what direction it's pointed in	
+
         //Same for the rest
-        collider = colliderSet.transform.Find("PortCollider").gameObject;
-        collider.GetComponent<IfDrag>().parentBlock = parent;
-        collider.GetComponent<IfDrag>().direct = BlockData.direction.port;
+		collider = colliderSet.transform.Find ("PortCollider").gameObject;
+		collider.GetComponent<IfDrag> ().parentBlock = parent;
+		collider.GetComponent<IfDrag> ().direct = BlockData.direction.port;
 
-        collider = colliderSet.transform.Find("AftCollider").gameObject;
-        collider.GetComponent<IfDrag>().parentBlock = parent;
-        collider.GetComponent<IfDrag>().direct = BlockData.direction.aft;
+		collider = colliderSet.transform.Find ("AftCollider").gameObject;
+		collider.GetComponent<IfDrag> ().parentBlock = parent;
+		collider.GetComponent<IfDrag> ().direct = BlockData.direction.aft;
 
-        collider = colliderSet.transform.Find("StarbordCollider").gameObject;
-        collider.GetComponent<IfDrag>().parentBlock = parent;
-        collider.GetComponent<IfDrag>().direct = BlockData.direction.starbord;
+
+		collider = colliderSet.transform.Find("StarbordCollider").gameObject;
+		collider.GetComponent<IfDrag>().parentBlock = parent;
+		collider.GetComponent<IfDrag>().direct = BlockData.direction.starbord;
     }
 
     //Finds the location that the new block should be, offset to take in account what side the block is being added to
@@ -74,4 +77,5 @@ public class AddBlock : MonoBehaviour {
             }
         }
     }
+		
 }
